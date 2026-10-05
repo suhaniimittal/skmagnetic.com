@@ -16,11 +16,17 @@ export async function getCategories() {
 }
 
 export async function getProducts() {
-  const categories = await getCategories();
-  const catOrder = new Map(categories.map((c, i) => [c.id, i]));
-  return (await getCollection('products')).sort(
-    (a, b) => (catOrder.get(a.data.category.id) ?? 99) - (catOrder.get(b.data.category.id) ?? 99) || byOrder(a, b),
-  );
+  try {
+    const categories = await getCategories();
+    const catOrder = new Map(categories.map((c, i) => [c.id, i]));
+    const products = await getCollection('products');
+    return products.sort(
+      (a, b) => (catOrder.get(a.data.category.id) ?? 99) - (catOrder.get(b.data.category.id) ?? 99) || byOrder(a, b),
+    );
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return []; // failsafe return
+  }
 }
 
 export async function getIndustries() {
